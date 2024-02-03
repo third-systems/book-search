@@ -4,7 +4,7 @@ import { NextjsSite } from "sst/constructs";
 export default {
   config(_input) {
     return {
-      name: "frontend",
+      name: "book-search",
       region: "us-east-1",
     };
   },

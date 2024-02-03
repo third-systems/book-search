@@ -65,6 +65,5 @@ export const reviews = pgTable("reviews", {
     onUpdate: "cascade",
   }),
   review: text("review"),
-  // TODO: failed to parse database type 'vector'
   embedding: customVector("embedding", { dimensions: 384 }),
 });
