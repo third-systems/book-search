@@ -17,6 +17,18 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.gr-assets.com",
+      },
+      {
+        protocol: "https",
+        hostname: "s.gr-assets.com",
+      },
+    ],
+  },
 };
 
 export default config;
