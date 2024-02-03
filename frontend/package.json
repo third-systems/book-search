@@ -8,7 +8,7 @@
     "db:push": "drizzle-kit push:pg",
     "db:studio": "drizzle-kit studio",
     "db:introspect": "drizzle-kit introspect:pg",
-    "dev": "next dev",
+    "dev": "sst bind next dev",
     "lint": "next lint",
     "start": "next start"
   },
@@ -44,7 +44,10 @@
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.7",
     "tailwindcss": "^3.3.5",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "sst": "^2.40.1",
+    "aws-cdk-lib": "2.124.0",
+    "constructs": "10.3.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.26.0"
