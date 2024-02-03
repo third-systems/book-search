@@ -1,0 +1,6 @@
+pandas
+numpy
+supabase
+sentence-transformers
+tqdm
+jupyterlab
