@@ -1,8 +1,11 @@
+import BookCard from "@/components/book-card";
+import { Searchbar } from "@/components/search";
+import { Spinner } from "@/components/spinner";
+import { api } from "@/utils/api";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
-import { Code, Textarea, Progress } from "@nextui-org/react";
 
 interface IEvent {
   status: string;
@@ -10,11 +13,16 @@ interface IEvent {
   output: number[];
 }
 
-export default function Home() {
+const SearchPage = () => {
   const workerRef = useRef<Worker>();
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState<number>(0);
-  const [result, setResult] = useState<number[]>([]);
+  const {
+    mutate,
+    data: searchResults,
+    isLoading,
+    reset,
+  } = api.book.findSimilarBooks.useMutation();
 
   useEffect(() => {
     workerRef.current = new Worker(
@@ -34,7 +42,7 @@ export default function Home() {
           setProgress(event.data.progress);
           break;
         case "complete":
-          setResult(event.data.output);
+          mutate(event.data.output);
           break;
       }
     };
@@ -47,41 +55,54 @@ export default function Home() {
     };
   }, []);
 
-  const onTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-    workerRef.current?.postMessage({ text: e.target.value });
-  };
+  const { query } = useRouter();
+  const searchTerm = query.query ?? "";
+
+  useEffect(() => {
+    console.log(searchTerm);
+    if (searchTerm) {
+      workerRef.current?.postMessage({ text: searchTerm });
+    } else {
+      if (searchResults) {
+        reset();
+      }
+    }
+  }, [searchTerm]);
 
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center p-24 ${inter.className} className="dark text-foreground bg-background"`}
-    >
-      <h1 className="text-4xl font-bold">
-        Transformers.js Client Side Processing
-      </h1>
-      <Textarea
-        label="Description"
-        className="mt-4 w-full"
-        variant="bordered"
-        labelPlacement="outside"
-        placeholder="Enter your description"
-        onChange={onTextChange}
-      />
-      {progress < 100 && (
-        <Progress
-          size="md"
-          className="mt-4 w-full"
-          aria-label="Loading..."
-          value={progress}
-        />
-      )}
-      {ready && result && (
-        <>
-          <h2>Response: </h2>
-          <Code color="default" className="mt-10">
-            {JSON.stringify(result)}
-          </Code>
-        </>
-      )}
-    </main>
+    <>
+      <section className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+        <div className="flex w-full items-center justify-center">
+          <Link href="/">
+            <ArrowLeft className="mr-2 h-5 w-5" />
+          </Link>
+          <Searchbar />
+        </div>
+        {searchTerm === "" && <Sample />}
+        {isLoading && <Spinner />}
+        {ready ? (
+          <ul className="books-grid w-1/2 items-center">
+            {searchResults?.map((book) => (
+              <li key={book.id} className="flex">
+                <BookCard
+                  id={book.id}
+                  title={book.title ?? ""}
+                  img={book.img ?? ""}
+                  url={book.url ?? ""}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <></>
+        )}
+      </section>
+    </>
   );
-}
+};
+
+const Sample = () => {
+  return <section></section>;
+};
+
+export default SearchPage;

@@ -6,14 +6,15 @@ interface IBookCard {
   id: number;
   title: string;
   img: string;
+  url: string;
 }
 
 export default function BookCard(props: IBookCard) {
   return (
-    <Link
+    <a
+      target="_blank"
       title={props.title}
-      href={`/book/${props.id}`}
-      prefetch={false}
+      href={props.url}
       className={styles.card}
     >
       <Image
@@ -24,6 +25,6 @@ export default function BookCard(props: IBookCard) {
         alt={props.title}
         className={styles.cardImage}
       />
-    </Link>
+    </a>
   );
 }

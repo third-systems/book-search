@@ -1,6 +1,7 @@
-import { books } from "@/server/db/schema";
+import { books, reviews } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
+import { inArray, sql } from "drizzle-orm";
 
 export const bookRouter = createTRPCRouter({
   getBooks: publicProcedure
@@ -20,6 +21,7 @@ export const bookRouter = createTRPCRouter({
           id: books.id,
           title: books.title,
           img: books.img,
+          url: books.url,
         })
         .from(books)
         .limit(limit + 1)
@@ -29,12 +31,45 @@ export const bookRouter = createTRPCRouter({
       if (data.length > limit) {
         data.pop();
         nextCursor = cursor + data.length;
-        console.log("nextCursor", nextCursor);
       }
 
       return {
         books: data,
         nextCursor,
       };
+    }),
+  findSimilarBooks: publicProcedure
+    .input(z.array(z.number()))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { db } = ctx;
+        const res = (await db.execute(
+          sql`SELECT book_id FROM ${reviews} ORDER BY embedding <-> ${JSON.stringify(input)} LIMIT 25;`,
+        )) as { book_id: number }[];
+
+        const bookCounts: Record<number, number> = {};
+        res.forEach((book) => {
+          if (bookCounts[book.book_id]) {
+            bookCounts[book.book_id] += 1;
+          } else {
+            bookCounts[book.book_id] = 1;
+          }
+        });
+        const bookIds = Object.keys(bookCounts).flatMap((key) => parseInt(key));
+
+        const bookMeta = await db
+          .select({
+            id: books.id,
+            title: books.title,
+            img: books.img,
+            url: books.url,
+          })
+          .from(books)
+          .where(inArray(books.id, bookIds));
+
+        return bookMeta;
+      } catch (error) {
+        console.error(error);
+      }
     }),
 });

@@ -1,12 +1,14 @@
 import { generateSSGHelper } from "@/server/helper/ssgHelper";
-import { type GetStaticPropsContext } from "next";
 import { api } from "@/utils/api";
 import BookCard from "@/components/book-card";
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
+import { Spinner } from "@/components/spinner";
+import Link from "next/link";
+import { Search } from "lucide-react";
 
 const Home = () => {
-  const { data, isLoading, fetchNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, isFetchingNextPage } =
     api.book.getBooks.useInfiniteQuery(
       {},
       {
@@ -35,50 +37,59 @@ const Home = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
 
-  console.log(books.length);
   return (
-    <main className="flex h-full w-full flex-col items-center">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
+    <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+      <div className="flex w-1/2 items-center justify-between">
+        <h1 className="w-1/2 text-3xl font-extrabold tracking-tight">
           Bookish
         </h1>
-        <ul className="books-grid w-1/2">
-          {books.map((book, i) => (
-            <>
-              {i === books.length - 1 ? (
-                <li ref={ref} key={book.id} className="flex">
-                  <BookCard
-                    id={book.id}
-                    title={book.title ?? ""}
-                    img={book.img ?? ""}
-                  />
-                </li>
-              ) : (
-                <li key={book.id} className="flex">
-                  <BookCard
-                    id={book.id}
-                    title={book.title ?? ""}
-                    img={book.img ?? ""}
-                  />
-                </li>
-              )}
-            </>
-          ))}
-        </ul>
+        <Link
+          href="/search"
+          className="flex items-center rounded-sm border border-slate-300 py-1 pl-2 pr-6 hover:ring-1 hover:ring-slate-300"
+        >
+          <Search className="mr-2 h-5 w-5 text-gray-600" />
+          <span className="text-gray-600">Search for a book...</span>
+        </Link>
       </div>
-    </main>
+      <ul className="books-grid w-1/2 items-center">
+        {books.map((book, i) => (
+          <>
+            {i === books.length - 1 ? (
+              <li ref={ref} key={book.id} className="flex">
+                <BookCard
+                  id={book.id}
+                  title={book.title ?? ""}
+                  img={book.img ?? ""}
+                  url={book.url ?? ""}
+                />
+              </li>
+            ) : (
+              <li key={book.id} className="flex">
+                <BookCard
+                  id={book.id}
+                  title={book.title ?? ""}
+                  img={book.img ?? ""}
+                  url={book.url ?? ""}
+                />
+              </li>
+            )}
+          </>
+        ))}
+      </ul>
+      {isFetchingNextPage && <Spinner />}
+    </div>
   );
 };
 
 export default Home;
 
-// export async function getStaticProps(context: GetStaticPropsContext) {
-//   const ssg = generateSSGHelper();
-//   await ssg.book.getBooks.prefetch({ cursor: 0 });
-//
-//   return {
-//     props: {
-//       trpcState: ssg.dehydrate(),
-//     },
-//   };
-// }
+export async function getStaticProps() {
+  const ssg = generateSSGHelper();
+  await ssg.book.getBooks.prefetch({ cursor: 0 });
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+    },
+  };
+}
