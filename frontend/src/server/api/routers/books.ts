@@ -1,7 +1,7 @@
-import { books, reviews } from "@/server/db/schema";
+import { books } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { inArray, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export const bookRouter = createTRPCRouter({
   getBooks: publicProcedure
@@ -43,21 +43,8 @@ export const bookRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         const { db } = ctx;
-        const res = (await db.execute(
-          sql`SELECT book_id FROM ${reviews} ORDER BY embedding <-> ${JSON.stringify(input)} LIMIT 25;`,
-        )) as { book_id: number }[];
 
-        const bookCounts: Record<number, number> = {};
-        res.forEach((book) => {
-          if (bookCounts[book.book_id]) {
-            bookCounts[book.book_id] += 1;
-          } else {
-            bookCounts[book.book_id] = 1;
-          }
-        });
-        const bookIds = Object.keys(bookCounts).flatMap((key) => parseInt(key));
-
-        const bookMeta = await db
+        const res = await db
           .select({
             id: books.id,
             title: books.title,
@@ -65,9 +52,10 @@ export const bookRouter = createTRPCRouter({
             url: books.url,
           })
           .from(books)
-          .where(inArray(books.id, bookIds));
+          .orderBy(sql`embedding <-> ${JSON.stringify(input)}`)
+          .limit(25);
 
-        return bookMeta;
+        return res;
       } catch (error) {
         console.error(error);
       }

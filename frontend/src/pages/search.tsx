@@ -5,7 +5,7 @@ import { api } from "@/utils/api";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface IEvent {
   status: string;
@@ -16,7 +16,6 @@ interface IEvent {
 const SearchPage = () => {
   const workerRef = useRef<Worker>();
   const [ready, setReady] = useState(false);
-  const [progress, setProgress] = useState<number>(0);
   const {
     mutate,
     data: searchResults,
@@ -39,7 +38,6 @@ const SearchPage = () => {
           setReady(true);
           break;
         case "progress":
-          setProgress(event.data.progress);
           break;
         case "complete":
           mutate(event.data.output);
@@ -53,6 +51,7 @@ const SearchPage = () => {
     return () => {
       workerRef.current?.terminate();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { query } = useRouter();
@@ -67,6 +66,7 @@ const SearchPage = () => {
         reset();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
   return (

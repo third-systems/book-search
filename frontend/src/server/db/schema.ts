@@ -51,19 +51,5 @@ export const books = pgTable("books", {
   img: text("img"),
   year: smallint("year"),
   description: text("description"),
-});
-
-export const reviews = pgTable("reviews", {
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  id: bigint("id", { mode: "number" }).primaryKey().notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-    .defaultNow()
-    .notNull(),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  bookId: bigint("book_id", { mode: "number" }).references(() => books.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }),
-  review: text("review"),
   embedding: customVector("embedding", { dimensions: 384 }),
 });
