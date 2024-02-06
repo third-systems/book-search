@@ -1,5 +1,6 @@
 import { type SSTConfig } from "sst";
-import { NextjsSite } from "sst/constructs";
+import { Storage } from "stacks/bucket";
+import { Web } from "stacks/web";
 
 export default {
   config(_input) {
@@ -9,12 +10,9 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(function Site({ stack }) {
-      const site = new NextjsSite(stack, "site");
-
-      stack.addOutputs({
-        SiteUrl: site.url,
-      });
-    });
+    if (app.stage !== "production") {
+      app.setDefaultRemovalPolicy("destroy");
+    }
+    app.stack(Storage).stack(Web);
   },
 } satisfies SSTConfig;

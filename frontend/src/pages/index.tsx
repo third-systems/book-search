@@ -59,7 +59,7 @@ const Home = () => {
                 <BookCard
                   id={book.id}
                   title={book.title ?? ""}
-                  img={book.img ?? ""}
+                  img={book.s3Img ?? ""}
                   url={book.url ?? ""}
                 />
               </li>
@@ -68,7 +68,7 @@ const Home = () => {
                 <BookCard
                   id={book.id}
                   title={book.title ?? ""}
-                  img={book.img ?? ""}
+                  img={book.s3Img ?? ""}
                   url={book.url ?? ""}
                 />
               </li>

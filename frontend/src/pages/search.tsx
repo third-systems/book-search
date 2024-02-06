@@ -86,9 +86,11 @@ const SearchPage = () => {
               <li key={book.id} className="flex">
                 <BookCard
                   id={book.id}
-                  title={book.title ?? ""}
-                  img={book.img ?? ""}
-                  url={book.url ?? ""}
+                  title={book.title}
+                  img={book.s3Img}
+                  url={book.url}
+                  text={book.text ?? ""}
+                  score={book.score}
                 />
               </li>
             ))}

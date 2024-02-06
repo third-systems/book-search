@@ -4,3 +4,4 @@ supabase
 sentence-transformers
 tqdm
 jupyterlab
+langchain

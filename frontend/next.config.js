@@ -27,6 +27,10 @@ const config = {
         protocol: "https",
         hostname: "s.gr-assets.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
+      },
     ],
   },
 };

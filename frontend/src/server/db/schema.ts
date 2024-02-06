@@ -44,12 +44,26 @@ export const books = pgTable("books", {
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
     .defaultNow()
     .notNull(),
-  url: text("url"),
-  title: text("title"),
+  url: text("url").notNull(),
+  title: text("title").notNull(),
   authors: text("authors"),
   lang: text("lang"),
   img: text("img"),
   year: smallint("year"),
   description: text("description"),
-  embedding: customVector("embedding", { dimensions: 384 }),
+});
+
+export const vectors = pgTable("vectors", {
+  id: bigint("id", { mode: "number" }).primaryKey().notNull(),
+  insertedAt: timestamp("inserted_at", { withTimezone: true, mode: "string" })
+    .defaultNow()
+    .notNull(),
+  item_id: bigint("item_id", { mode: "number" })
+    .references(() => books.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
+  embedding: customVector("embedding", { dimensions: 384 }).notNull(),
+  chunk: text("chunk").notNull(),
 });
