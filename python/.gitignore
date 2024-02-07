@@ -1,6 +1,7 @@
 out/
 data/
 archive/
+covers/
 .ipynb_checkpoints/
 .venv/
 .env*

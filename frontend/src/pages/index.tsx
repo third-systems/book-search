@@ -1,11 +1,11 @@
+import BookCard from "@/components/book-card";
+import { Spinner } from "@/components/spinner";
 import { generateSSGHelper } from "@/server/helper/ssgHelper";
 import { api } from "@/utils/api";
-import BookCard from "@/components/book-card";
-import { useEffect, useMemo, useRef } from "react";
 import { useIntersection } from "@mantine/hooks"; // a hook that we'll be using to detect when the user reaches the bottom of the page
-import { Spinner } from "@/components/spinner";
-import Link from "next/link";
 import { Search } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef } from "react";
 
 const Home = () => {
   const { data, fetchNextPage, isFetchingNextPage } =
