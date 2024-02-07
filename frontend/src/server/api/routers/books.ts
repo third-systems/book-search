@@ -27,7 +27,12 @@ export const bookRouter = createTRPCRouter({
         .limit(limit + 1)
         .offset(cursor);
 
-      const recordsWithS3 = appendS3(data);
+      const recordsWithS3 = data.map((r) => {
+        return {
+          ...r,
+          s3Img: getS3Url(r.id),
+        };
+      });
 
       let nextCursor: typeof cursor | undefined = undefined;
       if (recordsWithS3.length > limit) {
@@ -63,7 +68,7 @@ export const bookRouter = createTRPCRouter({
         const dataWithS3 = ranks.map((r) => {
           return {
             ...r,
-            s3Img: `https://${Bucket.Assets.bucketName}.s3.amazonaws.com/covers/${r.id}.jpg`,
+            s3Img: getS3Url(r.id),
           };
         });
         return dataWithS3;
@@ -73,23 +78,22 @@ export const bookRouter = createTRPCRouter({
     }),
 });
 
-const appendS3 = (data: { id: number; title: string; url: string }[]) => {
-  const dataWithS3 = data.map((r) => {
-    return {
-      ...r,
-      s3Img: `https://${Bucket.Assets.bucketName}.s3.amazonaws.com/covers/${r.id}.jpg`,
-    };
-  });
-
-  return dataWithS3;
+const getS3Url = (id: number) => {
+  return `https://${Bucket.Assets.bucketName}.s3.amazonaws.com/covers/${id}.jpg`;
 };
 
 const getRanks = (
-  data: { id: number; title: string; score: number; text: string }[],
+  data: {
+    id: number;
+    title: string;
+    score: number;
+    text: string;
+    url: string;
+  }[],
 ) => {
   const results: Record<
     string,
-    { id: number; title: string; score: number; text: string }
+    { id: number; title: string; score: number; text: string; url: string }
   > = {};
   for (const d of data) {
     const { id, score } = d;
