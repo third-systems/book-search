@@ -1,8 +1,8 @@
 import { books, vectors } from "@/server/db/schema";
-import { createTRPCRouter, publicProcedure } from "../trpc";
-import { z } from "zod";
-import { inArray, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Bucket } from "sst/node/bucket";
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const bookRouter = createTRPCRouter({
   getBooks: publicProcedure
@@ -46,40 +46,27 @@ export const bookRouter = createTRPCRouter({
       try {
         const { db } = ctx;
 
-        const res = await db
-          .select({
-            item_id: vectors.item_id,
-            score: sql<number>`1 - (embedding <=> ${JSON.stringify(input)})`,
-            text: vectors.chunk,
-          })
-          .from(vectors)
-          .orderBy(sql`embedding <=> ${JSON.stringify(input)}`)
-          .limit(25);
-
-        const ranked = getRanks(res);
-
-        const bookIds = res.map((r) => r.item_id);
-        const metaData = await db
+        const response = await db
           .select({
             id: books.id,
             title: books.title,
             url: books.url,
+            score: sql<number>`1 - (embedding <=> ${JSON.stringify(input)})`,
+            text: vectors.chunk,
           })
           .from(books)
-          .where(inArray(books.id, bookIds));
+          .innerJoin(vectors, eq(books.id, vectors.item_id))
+          .orderBy(sql`embedding <=> ${JSON.stringify(input)}`)
+          .limit(25);
 
-        const metaDataWithS3 = appendS3(metaData);
-
-        const resultsWithTextAndScores = [];
-        for (const entry of metaDataWithS3) {
-          const rankedEntry = ranked.find((r) => r.item_id === entry.id);
-          if (!rankedEntry) continue;
-
-          const { text, score } = rankedEntry;
-          resultsWithTextAndScores.push({ ...entry, text, score });
-        }
-
-        return resultsWithTextAndScores.sort((a, b) => b.score - a.score);
+        const ranks = getRanks(response);
+        const dataWithS3 = ranks.map((r) => {
+          return {
+            ...r,
+            s3Img: `https://${Bucket.Assets.bucketName}.s3.amazonaws.com/covers/${r.id}.jpg`,
+          };
+        });
+        return dataWithS3;
       } catch (error) {
         console.error(error);
       }
@@ -98,22 +85,23 @@ const appendS3 = (data: { id: number; title: string; url: string }[]) => {
 };
 
 const getRanks = (
-  data: { item_id: number; score: number; text: string | null }[],
+  data: { id: number; title: string; score: number; text: string }[],
 ) => {
-  const results: Record<string, (typeof data)[number]> = {};
-  for (const result of data) {
-    const { item_id, score, text } = result;
+  const results: Record<
+    string,
+    { id: number; title: string; score: number; text: string }
+  > = {};
+  for (const d of data) {
+    const { id, score } = d;
     if (score < 0.79) continue;
 
-    if (!results[item_id]) {
-      results[result.item_id] = {
-        item_id,
-        score: 0,
-        text,
+    if (results[id]) {
+      results[id]!.score += score;
+    } else {
+      results[id] = {
+        ...d,
       };
     }
-
-    results[item_id]!.score += score;
   }
 
   const sorted = Object.values(results).sort((a, b) => b.score - a.score);
