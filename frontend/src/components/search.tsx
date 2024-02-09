@@ -28,13 +28,13 @@ export const Searchbar: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-1/2 items-center rounded-sm border border-slate-300 py-1 pl-2 pr-6 hover:ring-1 hover:ring-slate-300"
+      className="flex w-full grow items-center rounded-sm border border-slate-300 py-1 pl-2 pr-6 hover:ring-1 hover:ring-slate-300 md:w-1/2"
     >
       <Search className="mr-2 h-5 w-5 text-gray-600" />
       <input
         autoFocus
         type="text"
-        className=" w-full bg-transparent placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full bg-transparent placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
         placeholder="Search for a book..."
         onChange={handleChange}
         defaultValue={term}

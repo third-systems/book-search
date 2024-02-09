@@ -58,7 +58,6 @@ const SearchPage = () => {
   const searchTerm = query.query ?? "";
 
   useEffect(() => {
-    console.log(searchTerm);
     if (searchTerm) {
       workerRef.current?.postMessage({ text: searchTerm });
     } else {
@@ -71,8 +70,8 @@ const SearchPage = () => {
 
   return (
     <>
-      <section className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-        <div className="flex w-full items-center justify-center">
+      <section className="flex w-full flex-col items-center justify-center gap-6 p-4 lg:container lg:gap-12 lg:px-4 lg:py-16">
+        <div className="flex w-full items-center lg:w-1/2 lg:justify-center">
           <Link href="/">
             <ArrowLeft className="mr-2 h-5 w-5" />
           </Link>
@@ -81,7 +80,7 @@ const SearchPage = () => {
         {searchTerm === "" && <Sample />}
         {isLoading && <Spinner />}
         {ready ? (
-          <ul className="books-grid w-1/2 items-center">
+          <ul className="books-grid w-full items-center lg:w-1/2">
             {searchResults?.map((book) => (
               <li key={book.id} className="flex">
                 <BookCard
