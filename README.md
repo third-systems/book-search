@@ -1,7 +1,7 @@
 # 📚 Bookish
 
 **Bookish** is _semantic search engine_ finds books based on the semantic meaning of your query. It contains over 9,000 books.
-
+![Bookish App](screenshot.png)
 ## About
 
 This prototype shows how we can use LLMs in ways besides just chatbots to help us find content more directly related to the meaning of what we're looking for. Traditional keyword search engines generally attempts to find information by looking for content that fits the keywords in the query. This is a proof-of-concept rather than a finished product. 
